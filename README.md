@@ -1,0 +1,1 @@
+Smileful brings comedy content from across the web to the user, in a simple interface based on users’ preferences.
