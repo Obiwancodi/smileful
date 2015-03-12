@@ -31,3 +31,20 @@ class TestViews(unittest.TestCase):
         session.close()
         # Remove the tables and their data from the database
         Base.metadata.drop_all(engine)
+        
+    def get_content(self):
+        """Getting content"""
+        
+        contentA = Content(link="http://www.biztechmagazine.com/article/2007/07/http-vs-https", genre="crass")
+        
+        session.add(contentA)
+        session.commmit()
+        
+        response = self.client.get("/content/"{}.format(contentA.link))
+        
+        self.assertEqual(response.status_code, 200)
+        
+        
+        
+         
+   
