@@ -3,4 +3,6 @@ body {
 }
 
 
-input {display:inline-block;}
+form.form-inline div {
+display: inline-block;
+}

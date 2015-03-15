@@ -10,7 +10,6 @@
         <!-- CSS -->
         <!-- Bootstrap -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-        <!-- Blog -->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
         <!-- JavaScript -->
@@ -42,6 +41,7 @@
 			<li><a href="{{url_for('prefereences_get1')}}">Preferences</a></li>
 			<li><a href="#">Like</a></li>
 			<li><a href="#">Dislike</a></li>
+            <li><a href="{{url_for('get_content')}}">Smile</a></li>
 			
 		</ul>
 		<button type="button" class="btn btn-default navbar-btn">Smile!</button>

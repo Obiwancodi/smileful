@@ -18,7 +18,7 @@ from smileful.database import session
 
 @manager.command
 def seed():
-    content = Content(link="https://www.youtube.com/watch?v=Q2daFOY9e4Q",
+    content = Content(link="http://en.wikipedia.org/wiki/Crass",
     genre="crass")
     session.add(content)
     session.commit()
@@ -26,8 +26,8 @@ def seed():
     
 @manager.command
 def seed2():
-    content = Content(link="http://www.biztechmagazine.com/article/2007/07/http-vs-https",
-    genre="crass")
+    content = Content(link="http://bulbapedia.bulbagarden.net/wiki/Dark_%28type%29",
+    genre="dark")
     session.add(content)
     session.commit()
     
@@ -48,7 +48,28 @@ def adduser():
     session.add(user)
     session.commit()
 
-    
+@manager.command
+def seed3():
+    content1 = Content(link="http://c2.com/cgi/wiki?DontRepeatYourself",
+    genre="dry")
+    content2 = Content(link="http://www.cc.com/stand-up",
+                      genre="stand_up")
+    content3 = Content(link="http://www.theonion.com/",
+                      genre="satire")
+    content4 = Content(link="http://goanimate.com/",
+                      genre="animated")
+    content5 = Content(link="http://alwaysfunny.com/",
+                      genre="topical")
+    content6 = Content(link="http://dictionary.reference.com/browse/slapstick",
+                      genre="slapstick")
+    content7 = Content(link="http://en.wikipedia.org/wiki/Surreal",
+                      genre="surreal")
+    content8 = Content(link="http://en.wikipedia.org/wiki/Situational_leadership_theory",
+                      genre="situational")
+    content9 = Content(link="http://improv.com/index.cfm",
+                      genre="improv")
+    session.add_all([content1,content2,content3,content4,content5,content6,content7,content8,content9])
+    session.commit()
 
 
 if __name__ == '__main__':
