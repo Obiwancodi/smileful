@@ -4,6 +4,7 @@ from smileful import app
 from database import session
 from models import Content
 from models import User
+from models import Scores
 
 from flask.ext.login import login_required
 from flask.ext.login import current_user
@@ -17,7 +18,34 @@ from flask.ext.login import logout_user
 from werkzeug.security import generate_password_hash
 from random import randrange
 from random import shuffle
-from collections import OrderedDict
+
+
+def calulate_score(scores, dark, crass, stand_up, satire,dry, sketch_improv, topical,slapstick, surreal, pardoy):
+        scores_list = []
+        genres = [dark, crass, stand_up, satire, dry, sketch_improv, topical, slapstick, surreal, pardoy]
+        total_score = 0
+        for genre in genres:
+            total_score +=  + genre
+        print total_score   
+        for genre in genres:
+            score = float(genre)/(total_score) * 100
+            scores_list.append(score)
+            
+        scores.dark = scores_list[0]
+        scores.crass = scores_list[1]
+        scores.stand_up = scores_list[2]
+        scores.satire = scores_list[3]
+        scores.dry = scores_list[4]
+        scores.sketch_improv= scores_list[5]
+        scores.topical = scores_list[6]
+        scores.slapstick = scores_list[7]
+        scores.surreal = scores_list[8]
+        scores.pardoy = scores_list[9]
+        
+        print scores_list
+        print scores.dark
+        return scores_list
+
 @app.route("/")
 @app.route("/home")
 def frontpage():
@@ -28,16 +56,17 @@ def frontpage():
 @login_required
 def get_content():
     user = current_user
-    locations = OrderedDict(user.score_dict())
-    locations = OrderedDict(sorted(locations.items(), key=lambda t: t[1]))
-    print locations
+    scores = user.scores
+    dict_score = scores.make_scores_dict()
+    print dict_score
     num = randrange(1,101)
     print num
-    for location_number in locations:
-        if num -  int(locations[location_number]) > 0:
+    for score in dict_score:
+        if num - int(dict_score[score]) >= 0:
+            num = num - int(dict_score[score])
             continue
         else:
-            content_type = location_number
+            content_type = score
             print content_type
             content = session.query(Content).filter(Content.genre==content_type).all()
             shuffle(content)
@@ -50,10 +79,8 @@ def get_content():
             else:
                 return render_template("content.html", id=id, content=content)
             return locations
-    
-    
 
-    
+        
 @app.route("/preferences1", methods=["GET"])
 @login_required
 def prefereences_get1():
@@ -63,19 +90,23 @@ def prefereences_get1():
 @login_required
 def preferences_post():
     user = current_user
-    user.dark = int(request.form["dark"])
-    user.crass = int(request.form["crass"])
-    user.stand_up = int(request.form["stand_up"])
-    user.satire = int(request.form["satire"])
-    user.dry = int(request.form["dry"])
-    user.animated = int(request.form["animated"])
-    user.topical = int(request.form["topical"])
-    user.slapstick = int(request.form["slapstick"])
-    user.surreal = int(request.form["surreal"])
-    user.situational = int(request.form["situational"])
-    user.improv = int(request.form ["improv"])
-    user.calulate_dict_score()
-    user.calulate_location()
+    scores = session.query(Scores).filter(Scores.user_id == user.id).first()
+    if not scores:
+        scores = Scores(user_id = user.id)
+        
+    dark = int(request.form["dark"])
+    crass = int(request.form["crass"])
+    stand_up = int(request.form["stand_up"])
+    satire = int(request.form["satire"])
+    dry = int(request.form["dry"])
+    sketch_improv = int(request.form["sketch_improv"])
+    topical = int(request.form["topical"])
+    slapstick = int(request.form["slapstick"])
+    surreal = int(request.form["surreal"])
+    pardoy = int(request.form ["pardoy"])
+    
+    calulate_score(scores,dark,crass,stand_up,satire,dry,sketch_improv,topical,slapstick,surreal,pardoy)
+    session.add(scores)
     session.commit()
     
     return redirect(url_for("frontpage"))    
@@ -88,20 +119,22 @@ def prefereences_get2():
 @app.route("/editpreferences", methods=["POST"])
 @login_required
 def preferences_edit():
+    
     user = current_user
-    user.dark = int(request.form["dark"])
-    user.crass = int(request.form["crass"])
-    user.stand_up = int(request.form["stand_up"])
-    user.satire = int(request.form["satire"])
-    user.dry = int(request.form["dry"])
-    user.animated = int(request.form["animated"])
-    user.topical = int(request.form["topical"])
-    user.slapstick = int(request.form["slapstick"])
-    user.surreal = int(request.form["surreal"])
-    user.situational = int(request.form["situational"])
-    user.improv = int(request.form ["improv"])
-    user.calulate_dict_score()
-    user.calulate_location()
+    scores = session.query(Scores).filter(Scores.user_id == user.id).first()
+    
+    dark = int(request.form["dark"])
+    crass = int(request.form["crass"])
+    stand_up = int(request.form["stand_up"])
+    satire = int(request.form["satire"])
+    dry = int(request.form["dry"])
+    sketch_improv = int(request.form["sketch_improv"])
+    topical = int(request.form["topical"])
+    slapstick = int(request.form["slapstick"])
+    surreal = int(request.form["surreal"])
+    pardoy = int(request.form ["pardoy"])
+    calulate_score(scores,dark,crass,stand_up,satire,dry,sketch_improv,topical,slapstick,surreal,pardoy)
+    session.add(scores)
     session.commit()
     
     return redirect(url_for("frontpage"))

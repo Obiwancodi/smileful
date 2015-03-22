@@ -57,20 +57,23 @@ def seed3():
     content3 = Content(link="http://www.theonion.com/",
                       genre="satire")
     content4 = Content(link="http://goanimate.com/",
-                      genre="animated")
+                      genre="pardoy")
     content5 = Content(link="http://alwaysfunny.com/",
                       genre="topical")
     content6 = Content(link="http://dictionary.reference.com/browse/slapstick",
                       genre="slapstick")
     content7 = Content(link="http://en.wikipedia.org/wiki/Surreal",
                       genre="surreal")
-    content8 = Content(link="http://en.wikipedia.org/wiki/Situational_leadership_theory",
-                      genre="situational")
     content9 = Content(link="http://improv.com/index.cfm",
-                      genre="improv")
-    session.add_all([content1,content2,content3,content4,content5,content6,content7,content8,content9])
+                      genre="sketch_improv")
+    session.add_all([content1,content2,content3,content4,content5,content6,content7,content9])
     session.commit()
 
-
+@manager.command
+def seed4():
+    content = Content(link="https://www.youtube.com/watch?v=UBXbz8Kunss",
+                     genre="crass")
+    session.add(content)
+    session.commit()
 if __name__ == '__main__':
      manager.run()
