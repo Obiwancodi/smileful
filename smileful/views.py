@@ -52,9 +52,10 @@ def frontpage():
 
     return render_template("base.html")
 
-@app.route("/content", methods=["GET"])
+@app.route("/content/", methods=['GET', 'POST'])
 @login_required
 def get_content():
+    
     user = current_user
     scores = user.scores
     dict_score = scores.make_scores_dict()
@@ -71,6 +72,14 @@ def get_content():
             content = session.query(Content).filter(Content.genre==content_type).all()
             shuffle(content)
             content = content[0]
+            
+            if request.method == 'POST':
+                dislike = request.form["dislike"]
+                if dislike == dislike:
+                    print content.link
+                    user.dislike_content = [content]   
+                    session.commit()  
+                   
             if "https://www.youtube" in content.link:
                 url = content.link
                 v_id = url.split('=',1)
@@ -78,9 +87,8 @@ def get_content():
                 return render_template("youtube.html", id=id, content=content, v_id=v_id)
             else:
                 return render_template("content.html", id=id, content=content)
-            return locations
+            
 
-        
 @app.route("/preferences1", methods=["GET"])
 @login_required
 def prefereences_get1():
