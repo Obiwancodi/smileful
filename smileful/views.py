@@ -20,12 +20,12 @@ from random import randrange
 from random import shuffle
 
 
-def calulate_score(scores, dark, crass, stand_up, satire,dry, sketch_improv, topical,slapstick, surreal, pardoy):
+def calulate_score(scores,genres):
         scores_list = []
-        genres = [dark, crass, stand_up, satire, dry, sketch_improv, topical, slapstick, surreal, pardoy]
+        
         total_score = 0
         for genre in genres:
-            total_score +=  + genre
+            total_score +=  genre
         print total_score   
         for genre in genres:
             score = float(genre)/(total_score) * 100
@@ -52,7 +52,7 @@ def frontpage():
 
     return render_template("base.html")
 
-@app.route("/content/", methods=['GET', 'POST'])
+@app.route("/content/", methods=['GET'])
 @login_required
 def get_content():
     
@@ -73,22 +73,48 @@ def get_content():
             shuffle(content)
             content = content[0]
             
-            if request.method == 'POST':
-                dislike = request.form["dislike"]
-                if dislike == dislike:
-                    print content.link
-                    user.dislike_content = [content]   
-                    session.commit()  
-                   
             if "https://www.youtube" in content.link:
-                url = content.link
-                v_id = url.split('=',1)
-                print v_id[1]
-                return render_template("youtube.html", id=id, content=content, v_id=v_id)
+                    url = content.link
+                    v_id = url.split('=',1)
+                    print v_id[1]
+                    return render_template("youtube.html", id=id, content=content, v_id=v_id)
             else:
-                return render_template("content.html", id=id, content=content)
+                    return render_template("content.html", id=id, content=content)
             
-
+@app.route("/content/", methods=["POST"])
+@login_required
+def dislike_like():
+    user= current_user
+    content =session.query(Content).get(request.form["content.id"])
+    print content.id
+    like_dislike = request.form["dislike_like"]
+    if like_dislike == "dislike":
+        print content.link
+        print "dislike"
+        user.dislike_content.append(content)
+        session.commit()
+        return redirect(url_for("get_content"))
+    elif like_dislike == "like":
+        print "like"
+        genre = content.genre
+        print genre
+        scores = user.scores
+        dict_score = scores.make_scores_dict()
+        print dict_score
+        for score in dict_score:
+            if not score == genre:
+                continue
+            else:
+                print score
+                dict_score[score] = dict_score[score] + 1
+                print dict_score
+                calulate_score(scores,[dict_score[score] for score in dict_score])
+                print dict_score
+                session.commit()
+                
+                return redirect(url_for("get_content"))
+                 
+                
 @app.route("/preferences1", methods=["GET"])
 @login_required
 def prefereences_get1():
@@ -101,7 +127,7 @@ def preferences_post():
     scores = session.query(Scores).filter(Scores.user_id == user.id).first()
     if not scores:
         scores = Scores(user_id = user.id)
-        
+      
     dark = int(request.form["dark"])
     crass = int(request.form["crass"])
     stand_up = int(request.form["stand_up"])
@@ -112,8 +138,9 @@ def preferences_post():
     slapstick = int(request.form["slapstick"])
     surreal = int(request.form["surreal"])
     pardoy = int(request.form ["pardoy"])
+    genres = [dark,crass,stand_up,satire,dry,sketch_improv,topical,slapstick,surreal,pardoy]
     
-    calulate_score(scores,dark,crass,stand_up,satire,dry,sketch_improv,topical,slapstick,surreal,pardoy)
+    calulate_score(scores,genres)
     session.add(scores)
     session.commit()
     
@@ -141,21 +168,12 @@ def preferences_edit():
     slapstick = int(request.form["slapstick"])
     surreal = int(request.form["surreal"])
     pardoy = int(request.form ["pardoy"])
-    calulate_score(scores,dark,crass,stand_up,satire,dry,sketch_improv,topical,slapstick,surreal,pardoy)
-    session.add(scores)
+    calulate_score(scores,request.form)
     session.commit()
     
     return redirect(url_for("frontpage"))
 
-@app.route("/dislike/<id>", methods=["POST"])
-@login_required
-def dislike_content(id):
-    user = current_user
-    content = query.session(Content).get(id)
-    user.dislike_content = content
-    session.commit()
-    
-    return redirect(url_for("get_content"))
+
 
 
 @app.route("/like/<id>",methods=["POST"])
