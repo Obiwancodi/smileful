@@ -168,23 +168,11 @@ def preferences_edit():
     slapstick = int(request.form["slapstick"])
     surreal = int(request.form["surreal"])
     pardoy = int(request.form ["pardoy"])
-    calulate_score(scores,request.form)
+    calulate_score(scores,genres)
     session.commit()
     
     return redirect(url_for("frontpage"))
 
-
-
-
-@app.route("/like/<id>",methods=["POST"])
-@login_required
-def like_content(id):
-    user = current_user
-    content = query.session(Content).get(id)
-    user.like_content = content
-    content.genre = like_genre
-    
-    session.commit()
     
     
 @app.route("/login", methods=["GET"])
