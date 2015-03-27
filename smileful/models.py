@@ -30,9 +30,7 @@ class User(Base, UserMixin):
     email = Column(String(128), unique=True)
     password = Column(String(128), nullable=False)
     scores = relationship("Scores", uselist=False, backref="person")
-    
-
-    
+      
     dislike_content = relationship("Content", secondary="user_dislike_content_association",
                                  backref = "duser")
     """

@@ -20,37 +20,42 @@ from random import randrange
 from random import shuffle
 
 
-def calulate_score(scores,genres):
+def calulate_score(scores,values_dict):
+    
+        values_dict = {str(k):int(v) for k,v in values_dict.iteritems()}
+    
         scores_list = []
         
         total_score = 0
-        for genre in genres:
-            total_score +=  genre
-        print total_score   
-        for genre in genres:
-            score = float(genre)/(total_score) * 100
-            scores_list.append(score)
-            
-        scores.dark = scores_list[0]
-        scores.crass = scores_list[1]
-        scores.stand_up = scores_list[2]
-        scores.satire = scores_list[3]
-        scores.dry = scores_list[4]
-        scores.sketch_improv= scores_list[5]
-        scores.topical = scores_list[6]
-        scores.slapstick = scores_list[7]
-        scores.surreal = scores_list[8]
-        scores.pardoy = scores_list[9]
+        for scoress in values_dict.values():
+            total_score +=  scoress
         
-        print scores_list
-        print scores.dark
-        return scores_list
+        
+        scores_dict = {}
+        for genre,score in values_dict.iteritems():
+            scores_dict[genre] = int(float(score)/(total_score) * 100)
+            scores_list.append(score)
+        
+        
+        scores.dark = scores_dict["dark"]
+        scores.crass = scores_dict["crass"]
+        scores.stand_up = scores_dict["stand_up"]
+        scores.satire = scores_dict["satire"]
+        scores.dry = scores_dict["dry"]
+        scores.sketch_improv= scores_dict["sketch_improv"]
+        scores.topical = scores_dict["topical"]
+        scores.slapstick = scores_dict["slapstick"]
+        scores.surreal = scores_dict["surreal"]
+        scores.pardoy = scores_dict["pardoy"]
+        
+        return scores_dict
+        
 
 @app.route("/")
 @app.route("/home")
 def frontpage():
 
-    return render_template("base.html")
+    return render_template("home.html")
 
 @app.route("/content/", methods=['GET'])
 @login_required
@@ -58,6 +63,9 @@ def get_content():
     
     user = current_user
     scores = user.scores
+    disliked = user.dislike_content
+    disliked = [content.id for content in disliked]
+    print disliked
     dict_score = scores.make_scores_dict()
     print dict_score
     num = randrange(1,101)
@@ -69,9 +77,11 @@ def get_content():
         else:
             content_type = score
             print content_type
-            content = session.query(Content).filter(Content.genre==content_type).all()
+            content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked)).all()
+            print content
             shuffle(content)
             content = content[0]
+            print content.id
             
             if "https://www.youtube" in content.link:
                     url = content.link
@@ -101,19 +111,13 @@ def dislike_like():
         scores = user.scores
         dict_score = scores.make_scores_dict()
         print dict_score
-        for score in dict_score:
-            if not score == genre:
-                continue
-            else:
-                print score
-                dict_score[score] = dict_score[score] + 1
-                print dict_score
-                calulate_score(scores,[dict_score[score] for score in dict_score])
-                print dict_score
-                session.commit()
+        dict_score[genre] += 1
+        print dict_score
+        calulate_score(scores,dict_score)
+        session.commit()
                 
-                return redirect(url_for("get_content"))
-                 
+        return redirect(url_for("get_content"))
+               
                 
 @app.route("/preferences1", methods=["GET"])
 @login_required
@@ -127,20 +131,9 @@ def preferences_post():
     scores = session.query(Scores).filter(Scores.user_id == user.id).first()
     if not scores:
         scores = Scores(user_id = user.id)
-      
-    dark = int(request.form["dark"])
-    crass = int(request.form["crass"])
-    stand_up = int(request.form["stand_up"])
-    satire = int(request.form["satire"])
-    dry = int(request.form["dry"])
-    sketch_improv = int(request.form["sketch_improv"])
-    topical = int(request.form["topical"])
-    slapstick = int(request.form["slapstick"])
-    surreal = int(request.form["surreal"])
-    pardoy = int(request.form ["pardoy"])
-    genres = [dark,crass,stand_up,satire,dry,sketch_improv,topical,slapstick,surreal,pardoy]
     
-    calulate_score(scores,genres)
+    v = calulate_score(scores, request.form)
+    print v
     session.add(scores)
     session.commit()
     
@@ -157,18 +150,8 @@ def preferences_edit():
     
     user = current_user
     scores = session.query(Scores).filter(Scores.user_id == user.id).first()
-    
-    dark = int(request.form["dark"])
-    crass = int(request.form["crass"])
-    stand_up = int(request.form["stand_up"])
-    satire = int(request.form["satire"])
-    dry = int(request.form["dry"])
-    sketch_improv = int(request.form["sketch_improv"])
-    topical = int(request.form["topical"])
-    slapstick = int(request.form["slapstick"])
-    surreal = int(request.form["surreal"])
-    pardoy = int(request.form ["pardoy"])
-    calulate_score(scores,genres)
+    ve = calulate_score(scores,request.form)
+    print ve
     session.commit()
     
     return redirect(url_for("frontpage"))

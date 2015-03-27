@@ -39,17 +39,16 @@
 		
 		<ul class="nav navbar-nav">
 			<li><a href="{{url_for('prefereences_get1')}}">Preferences</a></li>
-			<li><a href="#">Like</a></li>
-			<li><a href="#">Dislike</a></li>
-            <li><a href="{{url_for('get_content')}}">Smile</a></li>
-			
 		</ul>
-		<button type="button" class="btn btn-default navbar-btn">Smile!</button>
-		
-        <ul class ="nav navbar-nav">
         
+        <ul class ="nav navbar-nav">
             <li><a href="{{url_for('login_get')}}">Login</a></li>
         </ul>
+        <ul class="nav navbar-nav">
+		    <form action="{{url_for('get_content')}}">
+                <input type="submit" value="Smile!">
+            </form>
+		</ul>
     </div>
 </div>
 		<div class="container">
