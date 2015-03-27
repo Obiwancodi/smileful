@@ -1,1 +1,1 @@
-web: gunicorn smileful.wsgi --log-file -
+web: gunicorn smileful:app --log-file -
