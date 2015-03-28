@@ -1,6 +1,6 @@
 import os
 class DevelopmentConfig(object):
-    SQLALCHEMY_DATABASE_URI = "postgresql://:@localhost:5432/smileful"
+    SQLALCHEMY_DATABASE_URI = "HEROKU_POSTGRESQL_MAROON_URL"
     DEBUG = True
     SECRET_KEY = os.environ.get("SMILEFUL_SECRET_KEY", "")
     

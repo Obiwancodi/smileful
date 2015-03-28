@@ -5,3 +5,10 @@
 [2015-03-27 23:52:23 +0000] [3844] [INFO] Handling signal: int
 [2015-03-27 23:52:23 +0000] [3851] [INFO] Worker exiting (pid: 3851)
 [2015-03-27 23:52:23 +0000] [3844] [INFO] Shutting down: Master
+[2015-03-28 00:06:09 +0000] [4359] [INFO] Starting gunicorn 19.3.0
+[2015-03-28 00:06:09 +0000] [4359] [INFO] Listening at: http://0.0.0.0:8080 (4359)
+[2015-03-28 00:06:09 +0000] [4359] [INFO] Using worker: sync
+[2015-03-28 00:06:09 +0000] [4366] [INFO] Booting worker with pid: 4366
+[2015-03-28 00:06:21 +0000] [4359] [INFO] Handling signal: int
+[2015-03-28 00:06:21 +0000] [4366] [INFO] Worker exiting (pid: 4366)
+[2015-03-28 00:06:21 +0000] [4359] [INFO] Shutting down: Master
