@@ -1,1 +1,1 @@
-web: python run.py run
+web: gunicorn smileful:app --log-file=-
