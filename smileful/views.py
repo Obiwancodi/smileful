@@ -18,9 +18,13 @@ from flask.ext.login import logout_user
 from werkzeug.security import generate_password_hash
 from random import randrange
 from random import shuffle
+from flask_wtf import Form
+from wtforms import StringField
+from wtforms.validators import DataRequired
 
 
-def calulate_score(scores,values_dict):
+
+def calculate_score(scores,values_dict):
     
         values_dict = {str(k):int(v) for k,v in values_dict.iteritems()}
     
@@ -63,25 +67,37 @@ def get_content():
     
     user = current_user
     scores = user.scores
+    if not scores:
+        return render_template("No_scores.html")
     disliked = user.dislike_content
     disliked = [content.id for content in disliked]
+    
     print disliked
     dict_score = scores.make_scores_dict()
+    total_score = 0
+    for values in dict_score:
+        total_score += dict_score[values]
+    print total_score
     print dict_score
-    num = randrange(1,101)
+    num = randrange(1,total_score+1)
     print num
     for score in dict_score:
-        if num - int(dict_score[score]) >= 0:
+        if num - int(dict_score[score]) > 0:
             num = num - int(dict_score[score])
             continue
         else:
             content_type = score
             print content_type
-            content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked)).all()
+            if user.want_vulgar == 1:
+                content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked),Content.vulgar==0).all()
+            elif user.want_vulgar == 0:
+                content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked)).all()
             print content
+            print user.want_vulgar
             shuffle(content)
             content = content[0]
             print content.id
+            print content.vulgar
             
             if "https://www.youtube" in content.link:
                     url = content.link
@@ -93,18 +109,19 @@ def get_content():
             
 @app.route("/content/", methods=["POST"])
 @login_required
-def dislike_like():
+def dislike_like_vulgar():
     user= current_user
-    content =session.query(Content).get(request.form["content.id"])
+    content = session.query(Content).get(request.form["content.id"])
     print content.id
-    like_dislike = request.form["dislike_like"]
-    if like_dislike == "dislike":
+    like_dislike_vulgar = request.form["dislike_like_vulgar"]
+    print like_dislike_vulgar
+    if like_dislike_vulgar == "dislike":
         print content.link
         print "dislike"
         user.dislike_content.append(content)
         session.commit()
         return redirect(url_for("get_content"))
-    elif like_dislike == "like":
+    elif like_dislike_vulgar == "like":
         print "like"
         genre = content.genre
         print genre
@@ -113,36 +130,42 @@ def dislike_like():
         print dict_score
         dict_score[genre] += 1
         print dict_score
-        calulate_score(scores,dict_score)
-        session.commit()
-                
+        calculate_score(scores,dict_score)
+        session.commit()       
         return redirect(url_for("get_content"))
-               
-                
-@app.route("/preferences1", methods=["GET"])
-@login_required
-def prefereences_get1():
-    return render_template("perferences.html")
+    elif like_dislike_vulgar =="vulgar":
+        content.vulgar = 1
+        session.commit()
+        return redirect(url_for("get_content"))
+    
 
-@app.route("/preferences1", methods=["POST"])
+                
+@app.route("/preferences", methods=["GET"])
+@login_required
+def preferences_get():
+    return render_template("preferences.html")
+
+@app.route("/preferences", methods=["POST"])
 @login_required
 def preferences_post():
     user = current_user
     scores = session.query(Scores).filter(Scores.user_id == user.id).first()
     if not scores:
         scores = Scores(user_id = user.id)
-    
-    v = calulate_score(scores, request.form)
+    try:
+        v = calculate_score(scores, request.form)
+    except ZeroDivisionError:
+        return render_template("All_zeros.html")
     print v
     session.add(scores)
     session.commit()
-    
+    flash("Preferences Saved","danger")
     return redirect(url_for("frontpage"))    
 
 @app.route("/editpreferences", methods=["GET"])
 @login_required
-def prefereences_get2():
-    return render_template("editperferences.html")
+def editpreferences_get():
+    return render_template("editpreferences.html")
 
 @app.route("/editpreferences", methods=["POST"])
 @login_required
@@ -150,10 +173,14 @@ def preferences_edit():
     
     user = current_user
     scores = session.query(Scores).filter(Scores.user_id == user.id).first()
-    ve = calulate_score(scores,request.form)
+    try:
+        ve = calculate_score(scores, request.form)
+    except ZeroDivisionError:
+        return render_template("All_zeros.html")
+    
     print ve
     session.commit()
-    
+    flash("Preferences Saved","danger")
     return redirect(url_for("frontpage"))
 
     
@@ -212,6 +239,22 @@ def logout():
 
 
 
-
+@app.route("/vulgar")
+@login_required
+def vulgar():
+    user = current_user
+    if user.want_vulgar == 0:
+        user.want_vulgar = 1
+        session.commit()
+        flash("Vulgar Content Turned Off","danger")
+        return redirect(url_for('frontpage'))
+    
+    elif user.want_vulgar == 1:
+        user.want_vulgar = 0
+        session.commit()
+        flash("Vulgar Content Turned On", "danger")
+        return redirect(url_for('frontpage'))
+        
+    
     
     

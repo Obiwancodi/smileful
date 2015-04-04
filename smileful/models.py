@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Text, PickleType
+from sqlalchemy import Table, Column, Integer, String, Text
 
 from database import Base, engine
 
@@ -26,10 +26,13 @@ user_seen_table = Table('user_content_seen_association', Base.metadata,
 class User(Base, UserMixin):
     __tablename__ = "users"
     
+    """want_vulgar=0 means want vulgar content = 1 means do not"""
+    
     id = Column(Integer, primary_key = True)
     email = Column(String(128), unique=True)
     password = Column(String(128), nullable=False)
     scores = relationship("Scores", uselist=False, backref="person")
+    want_vulgar = Column(Integer, nullable=False, default=0)
       
     dislike_content = relationship("Content", secondary="user_dislike_content_association",
                                  backref = "duser")
@@ -73,10 +76,11 @@ class Scores(Base):
     
 class Content(Base):
     __tablename__ = "content"
-    
+    """O in Vulgar means not Vulgar 1 means it is Vulgar"""
     id = Column(Integer, primary_key = True)
     link = Column(Text, nullable=False)
     genre = Column(String(128), nullable=False)
+    vulgar = Column(Integer, nullable=False, default=0)
     
     def content_as_dictionary(self):
         content = {
