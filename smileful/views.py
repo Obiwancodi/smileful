@@ -6,7 +6,7 @@ from models import Content
 from models import User
 from models import Scores
 
-from flask.ext.login import login_required
+from flask.ext.login import login_required, fresh_login_required
 from flask.ext.login import current_user
 from flask import flash
 from flask.ext.login import login_user
@@ -18,9 +18,6 @@ from flask.ext.login import logout_user
 from werkzeug.security import generate_password_hash
 from random import randrange
 from random import shuffle
-from flask_wtf import Form
-from wtforms import StringField
-from wtforms.validators import DataRequired
 
 
 
@@ -64,14 +61,16 @@ def frontpage():
 @app.route("/content/", methods=['GET'])
 @login_required
 def get_content():
-    
+
     user = current_user
     scores = user.scores
     if not scores:
         return render_template("No_scores.html")
     disliked = user.dislike_content
     disliked = [content.id for content in disliked]
-    
+    seen_content = user.user_seen_content
+    seen_content = [content.id for content in seen_content]
+    print seen_content
     print disliked
     dict_score = scores.make_scores_dict()
     total_score = 0
@@ -89,16 +88,19 @@ def get_content():
             content_type = score
             print content_type
             if user.want_vulgar == 1:
-                content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked),Content.vulgar==0).all()
+                content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked),~Content.id.in_(seen_content),Content.vulgar==0).all()
             elif user.want_vulgar == 0:
-                content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked)).all()
+                content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked),~Content.id.in_(seen_content)).all()
+            if not content:
+                return render_template("No_content.html", id=id, content=content)
             print content
             print user.want_vulgar
             shuffle(content)
             content = content[0]
+            user.user_seen_content.append(content)
+            session.commit()
             print content.id
-            print content.vulgar
-            
+            print content.vulgar 
             if "https://www.youtube" in content.link:
                     url = content.link
                     v_id = url.split('=',1)
@@ -198,7 +200,9 @@ def login_post():
     if not user or not check_password_hash(user.password, password):
         flash("Incorrect username or password", "danger")
         return redirect(url_for("login_get"))
-
+    
+    user.user_seen_content = []
+    session.commit()
     login_user(user)
     return redirect(request.args.get('next') or url_for("frontpage"))
 

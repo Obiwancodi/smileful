@@ -7,7 +7,7 @@ from flask.ext.login import UserMixin
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-
+from smileful import db
 
 
 
@@ -16,12 +16,12 @@ user_dislike_content_table = Table('user_dislike_content_association', Base.meta
                                   Column('users.id', Integer, ForeignKey('users.id')),
                                   Column('content.id', Integer, ForeignKey('content.id'))
                                   )
-"""
+
 user_seen_table = Table('user_content_seen_association', Base.metadata,
                        Column('users.id', Integer, ForeignKey('users.id')),
                        Column('content.id', Integer, ForeignKey('content.id'))
                        )
-"""
+
 
 class User(Base, UserMixin):
     __tablename__ = "users"
@@ -36,10 +36,10 @@ class User(Base, UserMixin):
       
     dislike_content = relationship("Content", secondary="user_dislike_content_association",
                                  backref = "duser")
-    """
+    
     user_seen_content = relationship("Content", secondary="user_content_seen_association",
                                     backref = "seencon")  
-       """ 
+
        
 class Scores(Base):
     __tablename__ = "scores"
@@ -77,6 +77,7 @@ class Scores(Base):
 class Content(Base):
     __tablename__ = "content"
     """O in Vulgar means not Vulgar 1 means it is Vulgar"""
+    
     id = Column(Integer, primary_key = True)
     link = Column(Text, nullable=False)
     genre = Column(String(128), nullable=False)
