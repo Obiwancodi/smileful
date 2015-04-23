@@ -46,9 +46,10 @@
             <li><a href="{{url_for('logout')}}">Logout</a></li>
         </ul>
         <ul class="nav navbar-nav">
+		 
 		    <form action="{{url_for('get_content')}}">
                 <input type="submit" value="Smile!">
-            </form>
+            </form>  
 		</ul>
         {%if current_user.is_authenticated()%}
         <ul class="nav navbar-nav">

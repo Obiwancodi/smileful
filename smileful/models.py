@@ -7,7 +7,7 @@ from flask.ext.login import UserMixin
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from smileful import db
+
 
 
 

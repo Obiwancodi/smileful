@@ -58,7 +58,7 @@ def frontpage():
 
     return render_template("home.html")
 
-@app.route("/content/", methods=['GET'])
+@app.route("/content", methods=['GET'])
 @login_required
 def get_content():
 
@@ -67,6 +67,7 @@ def get_content():
     if not scores:
         return render_template("No_scores.html")
     disliked = user.dislike_content
+    print disliked
     disliked = [content.id for content in disliked]
     seen_content = user.user_seen_content
     seen_content = [content.id for content in seen_content]
@@ -109,7 +110,7 @@ def get_content():
             else:
                     return render_template("content.html", id=id, content=content)
             
-@app.route("/content/", methods=["POST"])
+@app.route("/content", methods=["POST"])
 @login_required
 def dislike_like_vulgar():
     user= current_user
@@ -243,7 +244,7 @@ def logout():
 
 
 
-@app.route("/vulgar")
+@app.route("/vulgar", methods=["POST"])
 @login_required
 def vulgar():
     user = current_user
