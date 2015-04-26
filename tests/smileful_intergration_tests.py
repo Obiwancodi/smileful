@@ -13,7 +13,7 @@ os.environ["CONFIG_PATH"] = "smileful.config.TestingConfig"
 from smileful import app
 from smileful import models
 from smileful import login
-from smileful.views import calculate_score, get_content, preferences_post
+from smileful.views import calculate_score, get_content, preferences_post, add_scores
 from smileful.models import User, Scores, Content
 from smileful.database import Base, engine, session
 from werkzeug.security import check_password_hash
@@ -36,8 +36,7 @@ class TestViews(unittest.TestCase):
         # Create an example user
         self.user = models.User(email="alice@example.com",
                                 password=generate_password_hash("test"))
-        self.user1 = models.User(email="yes@example.com",
-                               password=generate_password_hash("test2"))
+        
         
         
         self.content1 = models.Content(link="https://www.youtube.com/watch?v=9FPv2toi5og", genre="stand_up", vulgar=1)
@@ -62,7 +61,7 @@ class TestViews(unittest.TestCase):
         self.content20 = models.Content(link="http://www.cc.com/video-clips/9gz49q/premium-blend-brutally-honest", genre="surreal")
         
         
-        session.add_all([self.user,self.user1,self.content1,self.content2,self.content3,self.content4,self.content5,self.content6,self.content7,self.content8,self.content9,self.content10,self.content11,self.content12,self.content13,self.content14,self.content15,self.content16,self.content17,self.content18,self.content19,self.content20])
+        session.add_all([self.user,self.content1,self.content2,self.content3,self.content4,self.content5,self.content6,self.content7,self.content8,self.content9,self.content10,self.content11,self.content12,self.content13,self.content14,self.content15,self.content16,self.content17,self.content18,self.content19,self.content20])
         session.commit()
         
         
@@ -83,9 +82,6 @@ class TestViews(unittest.TestCase):
         
     def testcalculatescore (self):
         
-        user = session.query(User).filter(User.email =="alice@example.com").first()
-        scores = Scores(user_id = user.id)
-        
         test_dict = {
             "dark": 70,
             "crass": 30,
@@ -99,8 +95,49 @@ class TestViews(unittest.TestCase):
             "pardoy":70
         }
         
-        calculate_score(scores,test_dict)
+        score_dict = {
+            "dark": 16,
+            "crass": 6,
+            "stand_up": 23,
+            "satire": 0,
+            "dry": 6,
+            "sketch_improv": 23,
+            "topical": 0,
+            "slapstick": 6,
+            "surreal": 0,
+            "pardoy": 16
+            
+        }
         
+        compare_dict = calculate_score(test_dict)
+        
+        self.assertEqual(compare_dict, score_dict)
+        
+        
+    def testAddScores(self):
+        
+        user = session.query(User).filter(User.email =="alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        
+        
+        
+        score_dict = {
+            "dark": 16,
+            "crass": 6,
+            "stand_up": 23,
+            "satire": 0,
+            "dry": 6,
+            "sketch_improv": 23,
+            "topical": 0,
+            "slapstick": 6,
+            "surreal": 0,
+            "pardoy": 16
+            
+        }
+        
+        
+        add_scores(scores, score_dict)
+    
         self.assertEqual(scores.dark, 16)
         self.assertEqual(scores.crass, 6)
         self.assertEqual(scores.stand_up, 23)
@@ -111,6 +148,8 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.slapstick, 6)
         self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 16)
+        
+        
         
     def testcalculatescorezero(self):
         user = session.query(User).filter(User.email =="alice@example.com").first()
@@ -143,13 +182,17 @@ class TestViews(unittest.TestCase):
         
     def testgetcontent (self):
         self.simulate_login()
-        user = self.user
+        
+        user = session.query(User).filter(User.email =="alice@example.com").first()
         scores = Scores(user_id = user.id)
+        
+        content = session.query(Content).all()
         
         content1 = session.query(Content).filter(Content.id == 20).first()
         content2 = session.query(Content).filter(Content.id == 17).first()
         content3 = session.query(Content).filter(Content.id == 15).first()
         content4 = session.query(Content).filter(Content.id == 6).first()
+        
         
         scores.dark = 16
         scores.crass = 6
@@ -167,17 +210,23 @@ class TestViews(unittest.TestCase):
         
         user.dislike_content = [content1, content2]
         
-        user.seen_content = [content3, content4]
+        user.user_seen_content= [content3, content4]
         
-        response = self.client.get("/content", data={
-                "content":"content"
-            })
+        response = self.client.get("/content")
         
         
+        
+        user = session.query(User).filter(User.email =="alice@example.com").first()
+        
+        content_test = user.user_seen_content
+        
+        content_test_id = [content.id for content in content_test]
+        
+        print content_test_id
         
         self.assertEqual(response.status_code,200)
-        self.assertNotEqual(content.id, 20)
         
+    """      
     def testlike(self):
         self.simulate_login()
         user = self.user
@@ -205,12 +254,11 @@ class TestViews(unittest.TestCase):
                 
             })
         self.assertEqual(response.status_code,302)
-        
+    """
+
     def testAddPreferences(self):
-        """It makes the correct dict of scores and adds them to dict in the view function but for some reason won't add to scores in the test funciton.  Is there a way to make sure the dicts are both the same (one from the function and one from the test?) Also how to I test that it creates a score realtionship with user?"""
+        
         self.simulate_login()
-        user = self.user
-        scores = Scores(user_id = user.id)
         
         response = self.client.post("/preferences", data ={
             "dark": 70,
@@ -225,20 +273,12 @@ class TestViews(unittest.TestCase):
             "pardoy":70
             })
         
-        test_dict = {
-            "dark": 70,
-            "crass": 30,
-            "stand_up": 100,
-            "satire": 0,
-            "dry": 30,
-            "sketch_improv": 100,
-            "topical": 0,
-            "slapstick": 30,
-            "surreal": 0,
-            "pardoy":70
-        }
         
-        calculate_score(scores,test_dict)
+        
+        
+        scores = session.query(Scores).filter(User.id == 1).first()
+        
+        
         
         self.assertEqual(response.status_code,302)
         self.assertEqual(urlparse(response.location).path, "/home")
@@ -252,7 +292,84 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.slapstick, 6)
         self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 16)
+    
+    
+    def testAddPreferencesAllZero(self):
+        
+        self.simulate_login()
+        
+        response = self.client.post("/preferences", data ={
+            "dark": 0,
+            "crass": 0,
+            "stand_up": 0,
+            "satire": 0,
+            "dry": 0,
+            "sketch_improv": 0,
+            "topical": 0,
+            "slapstick": 0,
+            "surreal": 0,
+            "pardoy": 0
+            })
+        
+        scores = session.query(Scores).filter(User.id == 1).first()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(scores, None)
 
+    def testAddPreferencesEdit(self):
+        
+        self.simulate_login()
+        
+        user = session.query(User).filter(User.email =="alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        
+        scores.dark = 16
+        scores.crass = 15
+        scores.stand_up = 4
+        scores.satire = 15
+        scores.dry = 12
+        scores.sketch_imporv = 0
+        scores.topical = 9
+        scores.slapstick = 9
+        scores.surreal = 0
+        scores.pardoy = 12
+        
+        
+        
+        response = self.client.post("/preferences", data ={
+            "dark": 100,
+            "crass": 30,
+            "stand_up": 100,
+            "satire": 0,
+            "dry": 30,
+            "sketch_improv": 0,
+            "topical": 0,
+            "slapstick": 30,
+            "surreal": 0,
+            "pardoy":70
+            })
+        
+        
+        
+        
+        scores = session.query(Scores).filter(User.id == 1).first()
+        
+        
+        
+        self.assertEqual(response.status_code,302)
+        self.assertEqual(urlparse(response.location).path, "/home")
+        self.assertEqual(scores.dark, 27)
+        self.assertEqual(scores.crass, 8)
+        self.assertEqual(scores.stand_up, 27)
+        self.assertEqual(scores.satire, 0)
+        self.assertEqual(scores.dry, 8)
+        self.assertEqual(scores.sketch_improv, 0)
+        self.assertEqual(scores.topical, 0)
+        self.assertEqual(scores.slapstick, 8)
+        self.assertEqual(scores.surreal, 0)
+        self.assertEqual(scores.pardoy, 19)
+
+    
     def testLogin(self):
         
         user = session.query(User).filter_by(email="alice@example.com").first()
@@ -365,9 +482,9 @@ class TestViews(unittest.TestCase):
         self.assertEqual(urlparse(response.location).path, "/home")
         
         users = session.query(models.User).all()
-        self.assertEqual(len(users), 3)
+        self.assertEqual(len(users), 2)
         
-        user = users[2]
+        user = users[1]
         
         password = "test7"
         
@@ -442,7 +559,7 @@ class TestViews(unittest.TestCase):
         self.simulate_login()
         user = self.user
         user.want_vulgar = 0
-        print user.want_vulgar
+       
         
         response = self.client.post("/vulgar", follow_redirects=True, data = {
                 "user.want_vulgar": "0"
@@ -469,7 +586,7 @@ class TestViews(unittest.TestCase):
         self.simulate_login()
         user = self.user
         user.want_vulgar = 1
-        print user.want_vulgar
+        
         
         response = self.client.post("/vulgar", follow_redirects=True, data = {
                 "user.want_vulgar": "1"

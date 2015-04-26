@@ -6,7 +6,7 @@ class DevelopmentConfig(object):
     
 class TestingConfig(object):
     SQLALCHEMY_DATABASE_URI = "postgresql://:@localhost:5432/smileful_test"
-    DEBUG = True
+    DEBUG = False
     SECRET_KEY = "Not secret"
     
     

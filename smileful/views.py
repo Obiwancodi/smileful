@@ -21,7 +21,7 @@ from random import shuffle
 
 
 
-def calculate_score(scores,values_dict):
+def calculate_score(values_dict):
     
         values_dict = {str(k):int(v) for k,v in values_dict.iteritems()}
     
@@ -33,24 +33,28 @@ def calculate_score(scores,values_dict):
         
         
         scores_dict = {}
+        
         for genre,score in values_dict.iteritems():
             scores_dict[genre] = int(float(score)/(total_score) * 100)
             scores_list.append(score)
-        
-        
-        scores.dark = scores_dict["dark"]
-        scores.crass = scores_dict["crass"]
-        scores.stand_up = scores_dict["stand_up"]
-        scores.satire = scores_dict["satire"]
-        scores.dry = scores_dict["dry"]
-        scores.sketch_improv= scores_dict["sketch_improv"]
-        scores.topical = scores_dict["topical"]
-        scores.slapstick = scores_dict["slapstick"]
-        scores.surreal = scores_dict["surreal"]
-        scores.pardoy = scores_dict["pardoy"]
-        
+            
+            
         return scores_dict
-        
+    
+    
+    
+def add_scores(scores, scores_dict):
+    
+    scores.dark = scores_dict["dark"]
+    scores.crass = scores_dict["crass"]
+    scores.stand_up = scores_dict["stand_up"]
+    scores.satire = scores_dict["satire"]
+    scores.dry = scores_dict["dry"]
+    scores.sketch_improv= scores_dict["sketch_improv"]
+    scores.topical = scores_dict["topical"]
+    scores.slapstick = scores_dict["slapstick"]
+    scores.surreal = scores_dict["surreal"]
+    scores.pardoy = scores_dict["pardoy"]        
 
 @app.route("/")
 @app.route("/home")
@@ -156,37 +160,17 @@ def preferences_post():
     if not scores:
         scores = Scores(user_id = user.id)
     try:
-        v = calculate_score(scores, request.form)
+        v = calculate_score(request.form)
     except ZeroDivisionError:
         return render_template("All_zeros.html")
     print v
+    
+    add_scores(scores,v)
     session.add(scores)
     session.commit()
     flash("Preferences Saved","danger")
     return redirect(url_for("frontpage"))    
-
-@app.route("/editpreferences", methods=["GET"])
-@login_required
-def editpreferences_get():
-    return render_template("editpreferences.html")
-
-@app.route("/editpreferences", methods=["POST"])
-@login_required
-def preferences_edit():
-    
-    user = current_user
-    scores = session.query(Scores).filter(Scores.user_id == user.id).first()
-    try:
-        ve = calculate_score(scores, request.form)
-    except ZeroDivisionError:
-        return render_template("All_zeros.html")
-    
-    print ve
-    session.commit()
-    flash("Preferences Saved","danger")
-    return redirect(url_for("frontpage"))
-
-    
+  
     
 @app.route("/login", methods=["GET"])
 def login_get():
@@ -244,7 +228,7 @@ def logout():
 
 
 
-@app.route("/vulgar", methods=["POST"])
+@app.route("/vulgar")
 @login_required
 def vulgar():
     user = current_user

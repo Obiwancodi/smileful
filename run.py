@@ -1,7 +1,7 @@
 import os
 from flask.ext.script import Manager
 from smileful import app
-from getpass import getpass
+
 
 from werkzeug.security import generate_password_hash
 from smileful.models import User
