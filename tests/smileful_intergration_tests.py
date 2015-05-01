@@ -1,10 +1,9 @@
 import os
 import unittest
-import webtest
 from urlparse import urlparse
 
 from werkzeug.security import generate_password_hash
-from flask.ext.webtest import TestApp
+
 
 # Configure your app to use the testing database
 os.environ["CONFIG_PATH"] = "smileful.config.TestingConfig"
@@ -79,7 +78,7 @@ class TestViews(unittest.TestCase):
             http_session["user_id"] = str(self.user.id)
             http_session["_fresh"] = True
         
-        
+    
     def testcalculatescore (self):
         
         test_dict = {
@@ -179,82 +178,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.surreal, None)
         self.assertEqual(scores.pardoy, None)
         
-        
-    def testgetcontent (self):
-        self.simulate_login()
-        
-        user = session.query(User).filter(User.email =="alice@example.com").first()
-        scores = Scores(user_id = user.id)
-        
-        content = session.query(Content).all()
-        
-        content1 = session.query(Content).filter(Content.id == 20).first()
-        content2 = session.query(Content).filter(Content.id == 17).first()
-        content3 = session.query(Content).filter(Content.id == 15).first()
-        content4 = session.query(Content).filter(Content.id == 6).first()
-        
-        
-        scores.dark = 16
-        scores.crass = 6
-        scores.stand_up = 23
-        scores.satire = 0
-        scores.dry = 6
-        scores.stetch_improv = 23
-        scores.topical = 0 
-        scores.slapstick = 6
-        scores.surreal = 0
-        scores.pardoty = 16
-        
-        
-        user.want_vulgar = 1
-        
-        user.dislike_content = [content1, content2]
-        
-        user.user_seen_content= [content3, content4]
-        
-        response = self.client.get("/content")
-        
-        
-        
-        user = session.query(User).filter(User.email =="alice@example.com").first()
-        
-        content_test = user.user_seen_content
-        
-        content_test_id = [content.id for content in content_test]
-        
-        print content_test_id
-        
-        self.assertEqual(response.status_code,200)
-        
-    """      
-    def testlike(self):
-        self.simulate_login()
-        user = self.user
-        scores = Scores(user_id = user.id)
-        
-        content1 = session.query(Content).filter(Content.id == 20).first()
-        content2 = session.query(Content).filter(Content.id == 17).first()
-        content3 = session.query(Content).filter(Content.id == 15).first()
-        content4 = session.query(Content).filter(Content.id == 6).first()
-        
-        scores.dark = 16
-        scores.crass = 6
-        scores.stand_up = 23
-        scores.satire = 0
-        scores.dry = 6
-        scores.stetch_improv = 23
-        scores.topical = 0 
-        scores.slapstick = 6
-        scores.surreal = 0
-        scores.pardoty = 16
-        
-        response = self.client.post("/content", data = {
-                "like_dislike_vulgar":"like",
-                "content":"content1"
-                
-            })
-        self.assertEqual(response.status_code,302)
-    """
+    
 
     def testAddPreferences(self):
         
@@ -542,14 +466,14 @@ class TestViews(unittest.TestCase):
     def testvulgarno(self):
         
         self.simulate_login()
-        user = self.user
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         user.want_vulgar = 0
         print user.want_vulgar
         
         response = self.client.post("/vulgar", data = {
                 "user.want_vulgar": "0"
             })
-        
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         self.assertEqual(response.status_code,302)
         self.assertEqual(user.want_vulgar,1)
         
@@ -557,34 +481,34 @@ class TestViews(unittest.TestCase):
     def testvulgarnoFlash(self):
         
         self.simulate_login()
-        user = self.user
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         user.want_vulgar = 0
        
         
         response = self.client.post("/vulgar", follow_redirects=True, data = {
                 "user.want_vulgar": "0"
             })
-        
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         self.assertEqual(response.status_code,200)
         assert 'Vulgar Content Turned Off' in response.data
         
     def testvulgaryes(self):
         
         self.simulate_login()
-        user = self.user
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         user.want_vulgar = 1
         
         response = self.client.post("/vulgar", data = {
                 "user.want_vulgar": "1"
             })
-        
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(user.want_vulgar, 0)
 
     def testvulgaryesFlash(self):
         
         self.simulate_login()
-        user = self.user
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         user.want_vulgar = 1
         
         
@@ -592,8 +516,257 @@ class TestViews(unittest.TestCase):
                 "user.want_vulgar": "1"
             })
         
+        user = session.query(User).filter(User.email == "alice@example.com").first()
         self.assertEqual(response.status_code,200)
         assert 'Vulgar Content Turned On' in response.data
+        
+        
+    def testGetContentDisliked(self):
+        
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 0
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 100
+        scores.pardoy = 0
+        
+        
+        content1 = session.query(Content).filter(Content.link == "http://www.bing.com/videos/search?q=surreal%20comedians&qs=n&form=QBVR&pq=surreal%20comedians&sc=2-17&sp=-1&sk=#view=detail&mid=8E38C278DEA4752CC1E38E38C278DEA4752CC1E3").first()
+        content2 = session.query(Content).filter(Content.link == "http://www.cc.com/video-clips/9gz49q/premium-blend-brutally-honest").first()
+        
+        user.dislike_content = [content1]
+        disliked_content = [content.id for content in user.dislike_content]
+        print"This is user disliked content"
+        print disliked_content
+        
+        response = self.client.get("/content")
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        print "This is user seen content"
+        seen = [content.id for content in user.user_seen_content]
+        print seen
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(seen, [20])
+
+    def testGetContentSeen (self):
+        
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 0
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 100
+        scores.pardoy = 0
+        
+        content1 = session.query(Content).filter(Content.link == "http://www.bing.com/videos/search?q=surreal%20comedians&qs=n&form=QBVR&pq=surreal%20comedians&sc=2-17&sp=-1&sk=#view=detail&mid=8E38C278DEA4752CC1E38E38C278DEA4752CC1E3").first()
+        content2 = session.query(Content).filter(Content.link == "http://www.cc.com/video-clips/9gz49q/premium-blend-brutally-honest").first()
+        
+        
+        user.user_seen_content = [content1]
+        seen = [content.id for content in user.user_seen_content]
+        self.assertEqual(seen, [19])
+        
+        response = self.client.get("/content")
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        seen = [content.id for content in user.user_seen_content]
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(seen, [19,20])
+        
+        
+    def testGetContentNotVulgar(self):
+        
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        user.want_vulgar = 1
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 100
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 0
+        scores.pardoy = 0
+        
+        content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
+        content2 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
+        
+        print "this is content 2 id"
+        print content2.id
+        
+        response = self.client.get("/content")
+        
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        seen = [content.id for content in user.user_seen_content]
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(seen, [2])
+        
+    def testGetContentNoContentLeft(self):
+    
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 100
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 0
+        scores.pardoy = 0
+        
+        content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
+        content2 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
+        content3 = session.query(Content).filter(Content.link == "https://www.youtube.com/watch?v=kMwiBBCLT3o").first()
+        
+        user.user_seen_content = [content1,content2]
+        seen = [content.id for content in user.user_seen_content]
+        
+        response = self.client.get("/content")
+        
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(seen, [1,2])
+        
+      
+    def testContentDislikeContent(self):
+        
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 100
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 0
+        scores.pardoy = 0
+        
+        content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
+        
+        
+        user.dislike_content = []
+        
+        response = self.client.get("/content")
+        response = self.client.post("/content", data = {
+                "content.id": "1",
+                "dislike_like_vulgar":"dislike"
+            })
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        
+        dislike = [content.id for content in user.dislike_content]
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(dislike, [1])
+        
+        
+    def testContentMarkVulgar(self):
+        
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 100
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 0
+        scores.pardoy = 0
+        
+        content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
+        
+        response = self.client.get("/content")
+        response = self.client.post("/content", data = {
+                "content.id": "2",
+                "dislike_like_vulgar":"vulgar"
+            })
+        self.assertEqual(response.status_code, 302)
+        
+          
+        
+        response = self.client.get("/content")
+        
+        self.assertEqual(response.status_code, 200)
+        content = session.query(Content).filter(Content.link == "https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
+        print "Test Content Vulgar"
+        print content.vulgar
+        self.assertEqual(content.vulgar, 1)
+        
+    
+    def testContentLike(self):
+        
+        self.simulate_login()
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = Scores(user_id = user.id)
+        session.add(scores)
+        
+        scores.dark = 0
+        scores.crass = 0
+        scores.stand_up = 99
+        scores.satire = 0
+        scores.dry = 0
+        scores.sketch_imporv = 0
+        scores.topical = 0
+        scores.slapstick = 0
+        scores.surreal = 0
+        scores.pardoy = 0
+        
+        
+        content2 = session.query(Content).filter(Content.link == "https://www.youtube.com/watch?v=9FPv2toi5og").first()
+        
+        
+        response = self.client.get("/content")
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post("/content", data = {
+                "content.id": "1",
+                "dislike_like_vulgar":"like"
+            })
+        
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        scores = session.query(Scores).filter(User.id == 1).first()
+        print scores.stand_up
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(scores.stand_up, 100)
+        
         
         
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 {% block content %}
 
-
+    
     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
     <div id="player"></div>
 
@@ -19,8 +19,8 @@
       var player;
       function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
-          height: '950',
-          width: '1500',
+          height: '850',
+          width: '1300',
           videoId: '{{v_id[1]}}',
           events: {
             'onReady': onPlayerReady
@@ -38,6 +38,7 @@
         player.stopVideo();
       }
     </script>
+     
 
 <form  method="POST">
 <input type="submit" name="dislike_like_vulgar" value="like">Like

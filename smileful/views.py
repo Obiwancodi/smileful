@@ -73,10 +73,10 @@ def get_content():
     disliked = user.dislike_content
     print disliked
     disliked = [content.id for content in disliked]
-    seen_content = user.user_seen_content
+    seen_content = user.user_seen_content 
     seen_content = [content.id for content in seen_content]
+    print "This is seen content"
     print seen_content
-    print disliked
     dict_score = scores.make_scores_dict()
     total_score = 0
     for values in dict_score:
@@ -98,7 +98,7 @@ def get_content():
                 content = session.query(Content).filter(Content.genre==content_type,~Content.id.in_(disliked),~Content.id.in_(seen_content)).all()
             if not content:
                 return render_template("No_content.html", id=id, content=content)
-            print content
+            
             print user.want_vulgar
             shuffle(content)
             content = content[0]
@@ -110,6 +110,7 @@ def get_content():
                     url = content.link
                     v_id = url.split('=',1)
                     print v_id[1]
+                    
                     return render_template("youtube.html", id=id, content=content, v_id=v_id)
             else:
                     return render_template("content.html", id=id, content=content)
@@ -137,12 +138,15 @@ def dislike_like_vulgar():
         print dict_score
         dict_score[genre] += 1
         print dict_score
-        calculate_score(scores,dict_score)
+        scores_dict = calculate_score(dict_score)
+        add_scores(scores,scores_dict)
         session.commit()       
         return redirect(url_for("get_content"))
     elif like_dislike_vulgar =="vulgar":
         content.vulgar = 1
         session.commit()
+        print "Is Content Vulgar"
+        print content.vulgar
         return redirect(url_for("get_content"))
     
 

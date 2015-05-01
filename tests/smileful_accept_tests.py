@@ -55,7 +55,7 @@ class TestViews(unittest.TestCase):
         with self.client.session_transaction() as http_session:
             http_session["user_id"] = str(self.user.id)
             http_session["_fresh"] = True        
-       
+    
     def testLoginCorrect(self):
         
         self.browser.visit("http://0.0.0.0:5000/login")
@@ -295,7 +295,48 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.slapstick, 8)
         self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 19)
+        """
+        Need to turn off methods=['POST'] for vulgar test to work on accpetance, but rewrite it back for intergration
+    test to work. 
+    """
+    
+    def testGetContentNoScores(self):
+        self.browser.visit("http://0.0.0.0:5000/login")
+        self.browser.fill("email", "alice@example.com")
+        self.browser.fill("password", "test")
+        button = self.browser.find_by_css("button[type=submit]")
+        button.click()
+        self.assertEqual(self.browser.url, "http://0.0.0.0:5000/home")
+        self.browser.visit("http://0.0.0.0:5000/content")
+        self.assertEqual(self.browser.url, "http://0.0.0.0:5000/content")
         
+        user = session.query(User).filter(User.email == "alice@example.com").first()
+        self.assertEqual(user.scores, None)
+      
+    def testGetContent(self):
+        self.browser.visit("http://0.0.0.0:5000/login")
+        self.browser.fill("email", "alice@example.com")
+        self.browser.fill("password", "test")
+        button = self.browser.find_by_css("button[type=submit]")
+        button.click()
+        self.assertEqual(self.browser.url, "http://0.0.0.0:5000/home")
+        self.browser.visit("http://0.0.0.0:5000/preferences")
+        self.browser.choose('dark', '70')
+        self.browser.choose('crass', '30')
+        self.browser.choose('stand_up', '100')
+        self.browser.choose('satire', '0')
+        self.browser.choose('dry', '30')
+        self.browser.choose('sketch_improv','100')
+        self.browser.choose('topical','0')
+        self.browser.choose('slapstick', '30')
+        self.browser.choose('surreal', '0')
+        self.browser.choose('pardoy', '70')
+        button = self.browser.find_by_css("button[type=submit]")
+        button.click()
+        self.assertEqual(self.browser.url, "http://0.0.0.0:5000/home")
+        self.browser.visit("http://0.0.0.0:5000/content")
+        self.assertEqual(self.browser.url, "http://0.0.0.0:5000/content")
         
+    """Try Button type submit for like/dislike/get_vulgar then go by number in listElement get(0) Should I test post for get_content?"""        
 if __name__ == "__main__":
     unittest.main()        

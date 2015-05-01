@@ -3,6 +3,8 @@ body {
 }
 
 
-form.form-inline div {
-display: inline-block;
+div player{
+    text-align: center;
+    width : 1000em;
+    height: 1000em
 }

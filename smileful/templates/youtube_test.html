@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<iframe id="video" type = "text/html"src="{{content.link}}" width="100%" height="100%" frameborder="0"> </iframe>
+<script>
+$(function(){
+  $('#video').css({ width: $(window).innerWidth() + 'px', height: $(window).innerHeight() + 'px' });
+
+  // If you want to keep full screen on window resize
+  $(window).resize(function(){
+    $('#video').css({ width: $(window).innerWidth() + 'px', height: $(window).innerHeight() + 'px' });
+  });
+});
+</script>
+
+<form  method="POST">
+<input type="submit" name="dislike_like_vulgar" value="like">Like
+<input type="submit" name="dislike_like_vulgar" value="dislike">Dislike
+<input type="submit" name="dislike_like_vulgar" value="vulgar">Is This Vulgar?
+<input type="hidden" name="content.id" value="{{content.id}}">
+</form>
+
+
+
+{% endblock %}
