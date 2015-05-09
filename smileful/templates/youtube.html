@@ -2,10 +2,12 @@
 
 {% block content %}
 
-    
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">  
     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-    <div id="player"></div>
-
+<div class="youtube">
+    <center>
+    <div id="player" class="col-xs-12 text-center" align="center" ></div>
+    </center>
     <script>
       // 2. This code loads the IFrame Player API code asynchronously.
       var tag = document.createElement('script');
@@ -38,12 +40,12 @@
         player.stopVideo();
       }
     </script>
-     
+</div>     
 
 <form  method="POST">
-<input type="submit" name="dislike_like_vulgar" value="like">Like
-<input type="submit" name="dislike_like_vulgar" value="dislike">Dislike
-<input type="submit" name="dislike_like_vulgar" value="vulgar">Is This Vulgar?
+<input type="submit" name="dislike_like_vulgar" value="like">
+<input type="submit" name="dislike_like_vulgar" value="dislike">
+<input type="hidden" name="dislike_like_vulgar" value="vulgar">
 <input type="hidden" name="content.id" value="{{content.id}}">
 </form>
 

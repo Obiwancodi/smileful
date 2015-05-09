@@ -53,9 +53,7 @@ class Scores(Base):
     satire = Column(Integer, nullable=False, default=0) 
     dry = Column(Integer, nullable=False, default=0) 
     sketch_improv = Column(Integer, nullable=False, default=0)
-    topical = Column(Integer, nullable=False, default=0)
     slapstick = Column(Integer, nullable=False, default=0)
-    surreal = Column(Integer, nullable=False, default=0)
     pardoy = Column(Integer, nullable=False, default=0)
     
     def make_scores_dict(self):
@@ -66,9 +64,7 @@ class Scores(Base):
             "satire": self.satire,
             "dry": self.dry,
             "sketch_improv": self.sketch_improv,
-            "topical": self.topical,
             "slapstick": self.slapstick,
-            "surreal": self.surreal,
             "pardoy": self.pardoy
         }
         return scores_dict
@@ -91,3 +87,4 @@ class Content(Base):
         }
         return content
     
+Base.metadata.create_all(engine)

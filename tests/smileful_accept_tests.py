@@ -130,9 +130,7 @@ class TestViews(unittest.TestCase):
         self.browser.choose('satire', '0')
         self.browser.choose('dry', '30')
         self.browser.choose('sketch_improv','100')
-        self.browser.choose('topical','0')
         self.browser.choose('slapstick', '30')
-        self.browser.choose('surreal', '0')
         self.browser.choose('pardoy', '70')
         button = self.browser.find_by_css("button[type=submit]")
         button.click()
@@ -144,9 +142,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 30,
             "sketch_improv": 100,
-            "topical": 0,
             "slapstick": 30,
-            "surreal": 0,
             "pardoy":70
         }
         
@@ -159,9 +155,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.satire, 0)
         self.assertEqual(scores.dry, 6)
         self.assertEqual(scores.sketch_improv, 23)
-        self.assertEqual(scores.topical, 0)
         self.assertEqual(scores.slapstick, 6)
-        self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 16)
 
     def testAllPreferencesZero (self):
@@ -234,9 +228,7 @@ class TestViews(unittest.TestCase):
         self.browser.choose('satire', '0')
         self.browser.choose('dry', '30')
         self.browser.choose('sketch_improv','100')
-        self.browser.choose('topical','0')
         self.browser.choose('slapstick', '30')
-        self.browser.choose('surreal', '0')
         self.browser.choose('pardoy', '70')
         button = self.browser.find_by_css("button[type=submit]")
         button.click()
@@ -248,9 +240,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 30,
             "sketch_improv": 100,
-            "topical": 0,
             "slapstick": 30,
-            "surreal": 0,
             "pardoy":70
         }
         
@@ -262,9 +252,7 @@ class TestViews(unittest.TestCase):
         self.browser.choose('satire', '0')
         self.browser.choose('dry', '30')
         self.browser.choose('sketch_improv','0')
-        self.browser.choose('topical','0')
         self.browser.choose('slapstick', '30')
-        self.browser.choose('surreal', '0')
         self.browser.choose('pardoy', '70')
         button = self.browser.find_by_css("button[type=submit]")
         button.click()
@@ -277,9 +265,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 30,
             "sketch_improv": 0,
-            "topical": 0,
             "slapstick": 30,
-            "surreal": 0,
             "pardoy":70
             }
         
@@ -291,9 +277,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.satire, 0)
         self.assertEqual(scores.dry, 8)
         self.assertEqual(scores.sketch_improv, 0)
-        self.assertEqual(scores.topical, 0)
         self.assertEqual(scores.slapstick, 8)
-        self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 19)
         """
         Need to turn off methods=['POST'] for vulgar test to work on accpetance, but rewrite it back for intergration
@@ -324,12 +308,10 @@ class TestViews(unittest.TestCase):
         self.browser.choose('dark', '70')
         self.browser.choose('crass', '30')
         self.browser.choose('stand_up', '100')
-        self.browser.choose('satire', '0')
+        self.browser.choose('satire','30')
         self.browser.choose('dry', '30')
         self.browser.choose('sketch_improv','100')
-        self.browser.choose('topical','0')
         self.browser.choose('slapstick', '30')
-        self.browser.choose('surreal', '0')
         self.browser.choose('pardoy', '70')
         button = self.browser.find_by_css("button[type=submit]")
         button.click()

@@ -51,9 +51,7 @@ def add_scores(scores, scores_dict):
     scores.satire = scores_dict["satire"]
     scores.dry = scores_dict["dry"]
     scores.sketch_improv= scores_dict["sketch_improv"]
-    scores.topical = scores_dict["topical"]
     scores.slapstick = scores_dict["slapstick"]
-    scores.surreal = scores_dict["surreal"]
     scores.pardoy = scores_dict["pardoy"]        
 
 @app.route("/")
@@ -168,8 +166,10 @@ def preferences_post():
     except ZeroDivisionError:
         return render_template("All_zeros.html")
     print v
-    
-    add_scores(scores,v)
+    try:
+        add_scores(scores,v)
+    except KeyError:
+        return render_template("Not_Select_All.html")    
     session.add(scores)
     session.commit()
     flash("Preferences Saved","danger")
@@ -232,7 +232,7 @@ def logout():
 
 
 
-@app.route("/vulgar")
+@app.route("/vulgar", methods=['POST'])
 @login_required
 def vulgar():
     user = current_user

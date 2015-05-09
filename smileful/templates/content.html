@@ -5,13 +5,13 @@
 
 
 <body>
-<iframe src="{{content.link}}"  height="800px" width="800px" ></iframe>
+<iframe src="{{content.link}}"  height="850px" width="1300px" class="col-xs-12 text-center" align="center" frameBorder="0"></iframe>
 </body>
 
 <form  method="POST">
-<input type="submit" name="dislike_like_vulgar" value="like">Like
-<input type="submit" name="dislike_like_vulgar" value="dislike">Dislike
-<input type="submit" name="dislike_like_vulgar" value="vulgar">Is This Vulgar?
+<input type="submit" name="dislike_like_vulgar" value="like">
+<input type="submit" name="dislike_like_vulgar" value="dislike">
+<input type="hidden" name="dislike_like_vulgar" value="vulgar">
 <input type="hidden" name="content.id" value="{{content.id}}">
 </form>
 

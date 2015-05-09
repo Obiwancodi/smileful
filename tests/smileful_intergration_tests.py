@@ -88,9 +88,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 30,
             "sketch_improv": 100,
-            "topical": 0,
             "slapstick": 30,
-            "surreal": 0,
             "pardoy":70
         }
         
@@ -101,9 +99,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 6,
             "sketch_improv": 23,
-            "topical": 0,
             "slapstick": 6,
-            "surreal": 0,
             "pardoy": 16
             
         }
@@ -127,9 +123,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 6,
             "sketch_improv": 23,
-            "topical": 0,
             "slapstick": 6,
-            "surreal": 0,
             "pardoy": 16
             
         }
@@ -143,9 +137,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.satire, 0)
         self.assertEqual(scores.dry, 6)
         self.assertEqual(scores.sketch_improv, 23)
-        self.assertEqual(scores.topical, 0)
         self.assertEqual(scores.slapstick, 6)
-        self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 16)
         
         
@@ -161,9 +153,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 0,
             "sketch_improv": 0,
-            "topical": 0,
             "slapstick": 0,
-            "surreal": 0,
             "pardoy":0
         }
         
@@ -173,9 +163,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.satire, None)
         self.assertEqual(scores.dry, None)
         self.assertEqual(scores.sketch_improv, None)
-        self.assertEqual(scores.topical, None)
         self.assertEqual(scores.slapstick, None)
-        self.assertEqual(scores.surreal, None)
         self.assertEqual(scores.pardoy, None)
         
     
@@ -191,9 +179,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 30,
             "sketch_improv": 100,
-            "topical": 0,
             "slapstick": 30,
-            "surreal": 0,
             "pardoy":70
             })
         
@@ -212,9 +198,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.satire, 0)
         self.assertEqual(scores.dry, 6)
         self.assertEqual(scores.sketch_improv, 23)
-        self.assertEqual(scores.topical, 0)
         self.assertEqual(scores.slapstick, 6)
-        self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 16)
     
     
@@ -229,9 +213,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 0,
             "sketch_improv": 0,
-            "topical": 0,
             "slapstick": 0,
-            "surreal": 0,
             "pardoy": 0
             })
         
@@ -253,9 +235,7 @@ class TestViews(unittest.TestCase):
         scores.satire = 15
         scores.dry = 12
         scores.sketch_imporv = 0
-        scores.topical = 9
         scores.slapstick = 9
-        scores.surreal = 0
         scores.pardoy = 12
         
         
@@ -267,9 +247,7 @@ class TestViews(unittest.TestCase):
             "satire": 0,
             "dry": 30,
             "sketch_improv": 0,
-            "topical": 0,
             "slapstick": 30,
-            "surreal": 0,
             "pardoy":70
             })
         
@@ -288,9 +266,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(scores.satire, 0)
         self.assertEqual(scores.dry, 8)
         self.assertEqual(scores.sketch_improv, 0)
-        self.assertEqual(scores.topical, 0)
         self.assertEqual(scores.slapstick, 8)
-        self.assertEqual(scores.surreal, 0)
         self.assertEqual(scores.pardoy, 19)
 
     
@@ -530,18 +506,16 @@ class TestViews(unittest.TestCase):
         
         scores.dark = 0
         scores.crass = 0
-        scores.stand_up = 0
+        scores.stand_up = 100
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 100
         scores.pardoy = 0
         
         
-        content1 = session.query(Content).filter(Content.link == "http://www.bing.com/videos/search?q=surreal%20comedians&qs=n&form=QBVR&pq=surreal%20comedians&sc=2-17&sp=-1&sk=#view=detail&mid=8E38C278DEA4752CC1E38E38C278DEA4752CC1E3").first()
-        content2 = session.query(Content).filter(Content.link == "http://www.cc.com/video-clips/9gz49q/premium-blend-brutally-honest").first()
+        content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
+        content2 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
         
         user.dislike_content = [content1]
         disliked_content = [content.id for content in user.dislike_content]
@@ -554,7 +528,7 @@ class TestViews(unittest.TestCase):
         seen = [content.id for content in user.user_seen_content]
         print seen
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(seen, [20])
+        self.assertEqual(seen, [2])
 
     def testGetContentSeen (self):
         
@@ -565,29 +539,27 @@ class TestViews(unittest.TestCase):
         
         scores.dark = 0
         scores.crass = 0
-        scores.stand_up = 0
+        scores.stand_up = 100
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 100
         scores.pardoy = 0
         
-        content1 = session.query(Content).filter(Content.link == "http://www.bing.com/videos/search?q=surreal%20comedians&qs=n&form=QBVR&pq=surreal%20comedians&sc=2-17&sp=-1&sk=#view=detail&mid=8E38C278DEA4752CC1E38E38C278DEA4752CC1E3").first()
-        content2 = session.query(Content).filter(Content.link == "http://www.cc.com/video-clips/9gz49q/premium-blend-brutally-honest").first()
+        content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
+        content2 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
         
         
         user.user_seen_content = [content1]
         seen = [content.id for content in user.user_seen_content]
-        self.assertEqual(seen, [19])
+        self.assertEqual(seen, [1])
         
         response = self.client.get("/content")
         user = session.query(User).filter(User.email == "alice@example.com").first()
         seen = [content.id for content in user.user_seen_content]
         
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(seen, [19,20])
+        self.assertEqual(seen, [1,2])
         
         
     def testGetContentNotVulgar(self):
@@ -604,9 +576,7 @@ class TestViews(unittest.TestCase):
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 0
         scores.pardoy = 0
         
         content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
@@ -636,9 +606,7 @@ class TestViews(unittest.TestCase):
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 0
         scores.pardoy = 0
         
         content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
@@ -669,9 +637,7 @@ class TestViews(unittest.TestCase):
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 0
         scores.pardoy = 0
         
         content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=9FPv2toi5og").first()
@@ -705,9 +671,7 @@ class TestViews(unittest.TestCase):
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 0
         scores.pardoy = 0
         
         content1 = session.query(Content).filter(Content.link =="https://www.youtube.com/watch?v=HjLr7Duq3B8").first()
@@ -743,9 +707,7 @@ class TestViews(unittest.TestCase):
         scores.satire = 0
         scores.dry = 0
         scores.sketch_imporv = 0
-        scores.topical = 0
         scores.slapstick = 0
-        scores.surreal = 0
         scores.pardoy = 0
         
         
